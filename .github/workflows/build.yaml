@@ -34,16 +34,15 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           mkdir -p app/keystore
-
           if [ -n "$ANDROID_KEYSTORE_BASE64" ] && [ -n "$ANDROID_KEYSTORE_PASSWORD" ] && [ -n "$ANDROID_KEY_ALIAS" ] && [ -n "$ANDROID_KEY_PASSWORD" ]; then
             echo "Using configured release keystore from secrets."
             printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > app/keystore/build.keystore
-            cat <<PROPERTIES > app/keystore/keystore.properties
-            storeFile=build.keystore
-            storePassword=$ANDROID_KEYSTORE_PASSWORD
-            keyAlias=$ANDROID_KEY_ALIAS
-            keyPassword=$ANDROID_KEY_PASSWORD
-            PROPERTIES
+            {
+              echo "storeFile=build.keystore"
+              echo "storePassword=$ANDROID_KEYSTORE_PASSWORD"
+              echo "keyAlias=$ANDROID_KEY_ALIAS"
+              echo "keyPassword=$ANDROID_KEY_PASSWORD"
+            } > app/keystore/keystore.properties
           else
             echo "Release keystore secrets not configured; generating a throwaway debug keystore for sideload builds."
             keytool -genkey -v \
@@ -52,12 +51,12 @@ jobs:
               -keyalg RSA -keysize 2048 -validity 10000 \
               -storepass android -keypass android \
               -dname "CN=Android Debug,O=Android,C=US"
-            cat <<PROPERTIES > app/keystore/keystore.properties
-            storeFile=build.keystore
-            storePassword=android
-            keyAlias=androiddebugkey
-            keyPassword=android
-            PROPERTIES
+            {
+              echo "storeFile=build.keystore"
+              echo "storePassword=android"
+              echo "keyAlias=androiddebugkey"
+              echo "keyPassword=android"
+            } > app/keystore/keystore.properties
           fi
 
       - name: Grant execute permission for Gradle wrapper
