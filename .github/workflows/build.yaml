@@ -38,7 +38,7 @@ jobs:
             echo "Using configured release keystore from secrets."
             printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > app/keystore/build.keystore
             {
-              echo "storeFile=build.keystore"
+              echo "storeFile=keystore/build.keystore"
               echo "storePassword=$ANDROID_KEYSTORE_PASSWORD"
               echo "keyAlias=$ANDROID_KEY_ALIAS"
               echo "keyPassword=$ANDROID_KEY_PASSWORD"
@@ -52,7 +52,7 @@ jobs:
               -storepass android -keypass android \
               -dname "CN=Android Debug,O=Android,C=US"
             {
-              echo "storeFile=build.keystore"
+              echo "storeFile=keystore/build.keystore"
               echo "storePassword=android"
               echo "keyAlias=androiddebugkey"
               echo "keyPassword=android"
