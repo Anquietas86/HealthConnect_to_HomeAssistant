@@ -32,6 +32,10 @@ class HealthData(
             val heartRate = getHeartRateData(hc, syncDays)
             healthData["heart"] = heartRate
         }
+        if (context.getSettings("bloodPressure", true) == true) {
+            val bloodPressure = getBloodPressureData(hc, syncDays)
+            healthData["bloodPressure"] = bloodPressure
+        }
         if (context.getSettings("steps", true) == true) {
             val steps = getStepsData(hc, syncDays)
             healthData["steps"] = steps
@@ -377,6 +381,40 @@ class HealthData(
         if (resultMap.isEmpty()) {
             isUnavailable = true
             if (!unavailableReason.contains("heart rate")) unavailableReason.add("heart rate")
+            return null
+        }
+
+        return resultMap
+    }
+
+    private suspend fun getBloodPressureData(
+        hc: HealthConnectManager,
+        days: Long,
+    ): Map<String, Any?>? {
+        val resultMap = mutableMapOf<String, MutableMap<String, Any>>()
+
+        hc.getBloodPressure(days)?.forEach { record ->
+            val date = dayTimestamp(record.time.epochSecond) ?: "unknown"
+
+            if (!resultMap.containsKey(date)) {
+                resultMap[date] = mutableMapOf()
+            }
+
+            resultMap[date]?.put(
+                record.time.epochSecond.toString(),
+                mapOf(
+                    "time" to record.time.epochSecond,
+                    "systolic" to record.systolic.inMillimetersOfMercury,
+                    "diastolic" to record.diastolic.inMillimetersOfMercury,
+                    "bodyPosition" to record.bodyPosition,
+                    "measurementLocation" to record.measurementLocation,
+                ),
+            )
+        }
+
+        if (resultMap.isEmpty()) {
+            isUnavailable = true
+            if (!unavailableReason.contains("blood pressure")) unavailableReason.add("blood pressure")
             return null
         }
 

@@ -141,6 +141,27 @@ class HealthConnectManager(
         return fetchedData.records
     }
 
+    suspend fun getBloodPressure(days: Long = DEFAULT_SYNC_DAYS): List<BloodPressureRecord>? {
+        val currentZoneId = ZoneId.systemDefault()
+        val endDateTime = ZonedDateTime.ofInstant(Instant.now(), currentZoneId)
+        val startDateTime = endDateTime.minusDays(sanitizeDays(days))
+
+        val timeRange = TimeRangeFilter.between(startDateTime.toInstant(), endDateTime.toInstant())
+        val fetchedData =
+            try {
+                val request =
+                    ReadRecordsRequest(
+                        recordType = BloodPressureRecord::class,
+                        timeRangeFilter = timeRange,
+                    )
+                healthConnectClient.readRecords(request)
+            } catch (e: Exception) {
+                Log.e("HealthConnect", e.message.toString())
+                return null
+            }
+        return fetchedData.records
+    }
+
     suspend fun getSleep(days: Long = DEFAULT_SYNC_DAYS): List<SleepSessionRecord>? {
         val currentZoneId = ZoneId.systemDefault()
         val endDateTime = ZonedDateTime.ofInstant(Instant.now(), currentZoneId)
