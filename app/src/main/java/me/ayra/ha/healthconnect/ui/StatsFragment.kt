@@ -174,7 +174,7 @@ class StatsFragment : Fragment() {
                 return@launch
             }
 
-            val cachedStats = requireContext().getStats()
+            val cachedStats = runCatching { requireContext().getStats() }.getOrNull()
             if (cachedStats != null && cachedStats.hasData()) {
                 updateStats(cachedStats)
             } else {

@@ -32,6 +32,10 @@ class HealthData(
             val heartRate = getHeartRateData(hc, syncDays)
             healthData["heart"] = heartRate
         }
+        if (context.getSettings("bloodPressure", true) == true) {
+            val bloodPressure = getBloodPressureData(hc, syncDays)
+            healthData["bloodPressure"] = bloodPressure
+        }
         if (context.getSettings("steps", true) == true) {
             val steps = getStepsData(hc, syncDays)
             healthData["steps"] = steps
@@ -59,6 +63,22 @@ class HealthData(
         if (context.getSettings("calories", true) == true) {
             val calories = getTotalCaloriesBurned(hc, syncDays)
             healthData["calories"] = calories
+        }
+        if (context.getSettings("restingHeartRate", true) == true) {
+            val restingHeartRate = getRestingHeartRateData(hc, syncDays)
+            healthData["restingHeartRate"] = restingHeartRate
+        }
+        if (context.getSettings("bodyFat", true) == true) {
+            val bodyFat = getBodyFatData(hc, syncDays)
+            healthData["bodyFat"] = bodyFat
+        }
+        if (context.getSettings("respiratoryRate", true) == true) {
+            val respiratoryRate = getRespiratoryRateData(hc, syncDays)
+            healthData["respiratoryRate"] = respiratoryRate
+        }
+        if (context.getSettings("vo2Max", true) == true) {
+            val vo2Max = getVo2MaxData(hc, syncDays)
+            healthData["vo2Max"] = vo2Max
         }
         return healthData
     }
@@ -383,6 +403,40 @@ class HealthData(
         return resultMap
     }
 
+    private suspend fun getBloodPressureData(
+        hc: HealthConnectManager,
+        days: Long,
+    ): Map<String, Any?>? {
+        val resultMap = mutableMapOf<String, MutableMap<String, Any>>()
+
+        hc.getBloodPressure(days)?.forEach { record ->
+            val date = dayTimestamp(record.time.epochSecond) ?: "unknown"
+
+            if (!resultMap.containsKey(date)) {
+                resultMap[date] = mutableMapOf()
+            }
+
+            resultMap[date]?.put(
+                record.time.epochSecond.toString(),
+                mapOf(
+                    "time" to record.time.epochSecond,
+                    "systolic" to record.systolic.inMillimetersOfMercury,
+                    "diastolic" to record.diastolic.inMillimetersOfMercury,
+                    "bodyPosition" to record.bodyPosition,
+                    "measurementLocation" to record.measurementLocation,
+                ),
+            )
+        }
+
+        if (resultMap.isEmpty()) {
+            isUnavailable = true
+            if (!unavailableReason.contains("blood pressure")) unavailableReason.add("blood pressure")
+            return null
+        }
+
+        return resultMap
+    }
+
     private suspend fun getOxygenSaturation(
         hc: HealthConnectManager,
         days: Long,
@@ -459,6 +513,117 @@ class HealthData(
             if (!unavailableReason.contains("total calories")) {
                 unavailableReason.add("total calories")
             }
+            return null
+        }
+
+        return resultMap
+    }
+
+    private suspend fun getRestingHeartRateData(
+        hc: HealthConnectManager,
+        days: Long,
+    ): Map<String, Any?>? {
+        val resultMap = mutableMapOf<String, MutableMap<String, Any>>()
+
+        hc.getRestingHeartRate(days)?.forEach { record ->
+            val date = dayTimestamp(record.time.epochSecond) ?: "unknown"
+
+            if (!resultMap.containsKey(date)) {
+                resultMap[date] = mutableMapOf()
+            }
+
+            resultMap[date]?.put(
+                record.time.epochSecond.toString(),
+                record.beatsPerMinute,
+            )
+        }
+
+        if (resultMap.isEmpty()) {
+            isUnavailable = true
+            if (!unavailableReason.contains("resting heart rate")) unavailableReason.add("resting heart rate")
+            return null
+        }
+
+        return resultMap
+    }
+
+    private suspend fun getBodyFatData(
+        hc: HealthConnectManager,
+        days: Long,
+    ): Map<String, Any?>? {
+        val resultMap = mutableMapOf<String, MutableMap<Long, Any>>()
+
+        hc.getBodyFat(days)?.forEach { record ->
+            val date = dayTimestamp(record.time.epochSecond) ?: "unknown"
+            val entry = resultMap.getOrPut(date) { mutableMapOf() }
+            entry[record.time.epochSecond] = record.percentage.value
+        }
+
+        if (resultMap.isEmpty()) {
+            isUnavailable = true
+            if (!unavailableReason.contains("body fat")) unavailableReason.add("body fat")
+            return null
+        }
+
+        return resultMap
+    }
+
+    private suspend fun getRespiratoryRateData(
+        hc: HealthConnectManager,
+        days: Long,
+    ): Map<String, Any?>? {
+        val resultMap = mutableMapOf<String, MutableMap<String, Any>>()
+
+        hc.getRespiratoryRate(days)?.forEach { record ->
+            val date = dayTimestamp(record.time.epochSecond) ?: "unknown"
+
+            if (!resultMap.containsKey(date)) {
+                resultMap[date] = mutableMapOf()
+            }
+
+            resultMap[date]?.put(
+                record.time.epochSecond.toString(),
+                mapOf(
+                    "time" to record.time.epochSecond,
+                    "rate" to record.rate,
+                ),
+            )
+        }
+
+        if (resultMap.isEmpty()) {
+            isUnavailable = true
+            if (!unavailableReason.contains("respiratory rate")) unavailableReason.add("respiratory rate")
+            return null
+        }
+
+        return resultMap
+    }
+
+    private suspend fun getVo2MaxData(
+        hc: HealthConnectManager,
+        days: Long,
+    ): Map<String, Any?>? {
+        val resultMap = mutableMapOf<String, MutableMap<String, Any>>()
+
+        hc.getVo2Max(days)?.forEach { record ->
+            val date = dayTimestamp(record.time.epochSecond) ?: "unknown"
+
+            if (!resultMap.containsKey(date)) {
+                resultMap[date] = mutableMapOf()
+            }
+
+            resultMap[date]?.put(
+                record.time.epochSecond.toString(),
+                mapOf(
+                    "time" to record.time.epochSecond,
+                    "vo2Max" to record.vo2MillilitersPerMinuteKilogram.inMillilitersPerMinuteKilogram,
+                ),
+            )
+        }
+
+        if (resultMap.isEmpty()) {
+            isUnavailable = true
+            if (!unavailableReason.contains("vo2 max")) unavailableReason.add("vo2 max")
             return null
         }
 

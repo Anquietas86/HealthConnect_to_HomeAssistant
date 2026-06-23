@@ -141,6 +141,27 @@ class HealthConnectManager(
         return fetchedData.records
     }
 
+    suspend fun getBloodPressure(days: Long = DEFAULT_SYNC_DAYS): List<BloodPressureRecord>? {
+        val currentZoneId = ZoneId.systemDefault()
+        val endDateTime = ZonedDateTime.ofInstant(Instant.now(), currentZoneId)
+        val startDateTime = endDateTime.minusDays(sanitizeDays(days))
+
+        val timeRange = TimeRangeFilter.between(startDateTime.toInstant(), endDateTime.toInstant())
+        val fetchedData =
+            try {
+                val request =
+                    ReadRecordsRequest(
+                        recordType = BloodPressureRecord::class,
+                        timeRangeFilter = timeRange,
+                    )
+                healthConnectClient.readRecords(request)
+            } catch (e: Exception) {
+                Log.e("HealthConnect", e.message.toString())
+                return null
+            }
+        return fetchedData.records
+    }
+
     suspend fun getSleep(days: Long = DEFAULT_SYNC_DAYS): List<SleepSessionRecord>? {
         val currentZoneId = ZoneId.systemDefault()
         val endDateTime = ZonedDateTime.ofInstant(Instant.now(), currentZoneId)
@@ -360,6 +381,90 @@ class HealthConnectManager(
         } catch (e: Exception) {
             null
         }
+    }
+
+    suspend fun getRestingHeartRate(days: Long = DEFAULT_SYNC_DAYS): List<RestingHeartRateRecord>? {
+        val currentZoneId = ZoneId.systemDefault()
+        val endDateTime = ZonedDateTime.ofInstant(Instant.now(), currentZoneId)
+        val startDateTime = endDateTime.minusDays(sanitizeDays(days))
+
+        val timeRange = TimeRangeFilter.between(startDateTime.toInstant(), endDateTime.toInstant())
+        val fetchedData =
+            try {
+                val request =
+                    ReadRecordsRequest(
+                        recordType = RestingHeartRateRecord::class,
+                        timeRangeFilter = timeRange,
+                    )
+                healthConnectClient.readRecords(request)
+            } catch (e: Exception) {
+                Log.e("HealthConnect", e.message.toString())
+                return null
+            }
+        return fetchedData.records
+    }
+
+    suspend fun getBodyFat(days: Long = DEFAULT_SYNC_DAYS): List<BodyFatRecord>? {
+        val currentZoneId = ZoneId.systemDefault()
+        val endDateTime = ZonedDateTime.ofInstant(Instant.now(), currentZoneId)
+        val startDateTime = endDateTime.minusDays(sanitizeDays(days))
+
+        val timeRange = TimeRangeFilter.between(startDateTime.toInstant(), endDateTime.toInstant())
+        val fetchedData =
+            try {
+                val request =
+                    ReadRecordsRequest(
+                        recordType = BodyFatRecord::class,
+                        timeRangeFilter = timeRange,
+                    )
+                healthConnectClient.readRecords(request)
+            } catch (e: Exception) {
+                Log.e("HealthConnect", e.message.toString())
+                return null
+            }
+        return fetchedData.records
+    }
+
+    suspend fun getRespiratoryRate(days: Long = DEFAULT_SYNC_DAYS): List<RespiratoryRateRecord>? {
+        val currentZoneId = ZoneId.systemDefault()
+        val endDateTime = ZonedDateTime.ofInstant(Instant.now(), currentZoneId)
+        val startDateTime = endDateTime.minusDays(sanitizeDays(days))
+
+        val timeRange = TimeRangeFilter.between(startDateTime.toInstant(), endDateTime.toInstant())
+        val fetchedData =
+            try {
+                val request =
+                    ReadRecordsRequest(
+                        recordType = RespiratoryRateRecord::class,
+                        timeRangeFilter = timeRange,
+                    )
+                healthConnectClient.readRecords(request)
+            } catch (e: Exception) {
+                Log.e("HealthConnect", e.message.toString())
+                return null
+            }
+        return fetchedData.records
+    }
+
+    suspend fun getVo2Max(days: Long = DEFAULT_SYNC_DAYS): List<Vo2MaxRecord>? {
+        val currentZoneId = ZoneId.systemDefault()
+        val endDateTime = ZonedDateTime.ofInstant(Instant.now(), currentZoneId)
+        val startDateTime = endDateTime.minusDays(sanitizeDays(days))
+
+        val timeRange = TimeRangeFilter.between(startDateTime.toInstant(), endDateTime.toInstant())
+        val fetchedData =
+            try {
+                val request =
+                    ReadRecordsRequest(
+                        recordType = Vo2MaxRecord::class,
+                        timeRangeFilter = timeRange,
+                    )
+                healthConnectClient.readRecords(request)
+            } catch (e: Exception) {
+                Log.e("HealthConnect", e.message.toString())
+                return null
+            }
+        return fetchedData.records
     }
 
     suspend fun getAll(days: Long = DEFAULT_SYNC_DAYS): Map<String, List<Record>?> {
