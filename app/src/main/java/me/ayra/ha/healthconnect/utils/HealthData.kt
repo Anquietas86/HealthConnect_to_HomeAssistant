@@ -616,7 +616,7 @@ class HealthData(
                 record.time.epochSecond.toString(),
                 mapOf(
                     "time" to record.time.epochSecond,
-                    "vo2Max" to record.vo2MillilitersPerMinuteKilogram.inMillilitersPerMinuteKilogram,
+                    "vo2Max" to record.vo2MillilitersPerMinuteKilogram,
                 ),
             )
         }
