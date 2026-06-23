@@ -80,8 +80,8 @@
 
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
-            android:foregroundServiceType="health"
-            tools:node="merge" />
+            android:foregroundServiceType="health|dataSync"
+            tools:node="replace" />
 
         <service
             android:name=".ForegroundService"
