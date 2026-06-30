@@ -29,8 +29,8 @@ android {
         applicationId = "me.ayra.ha.healthconnect"
         minSdk = 26
         targetSdk = 35
-        versionCode = 6
-        versionName = "0.5.0"
+        versionCode = 7
+        versionName = "0.5.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -79,7 +79,7 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.2.1")
 
     // Workers
-    implementation("androidx.work:work-runtime-ktx:2.9.1")
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
     implementation("com.google.guava:guava:31.1-android")
 
     // Health Connect

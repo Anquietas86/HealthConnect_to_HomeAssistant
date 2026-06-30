@@ -8,6 +8,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.RemoteException
 import android.provider.Settings
@@ -236,7 +237,16 @@ class SyncWorker(
     }
 
     private fun createForegroundInfo(notificationManager: NotificationManager?): ForegroundInfo =
-        ForegroundInfo(FOREGROUND_NOTIFICATION_ID, buildNotification(notificationManager))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(
+                FOREGROUND_NOTIFICATION_ID,
+                buildNotification(notificationManager),
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH,
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            ForegroundInfo(FOREGROUND_NOTIFICATION_ID, buildNotification(notificationManager))
+        }
 
     private fun showSyncNotification(notificationManager: NotificationManager?): Boolean {
         if (notificationManager == null) {
